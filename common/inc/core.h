@@ -22,4 +22,17 @@ typedef dword errval;
 #define EUNDEFINED (1)
 #define EIO        (2)
 #define EUNINIT    (3)
+#define ETYPE      (4)
+#define EARG       (5)
+#define ESTATE     (6)
+
+struct TypeDesc
+{
+    char name[16];
+};
+
+struct IFaceDesc
+{
+    char name[16];
+};
 

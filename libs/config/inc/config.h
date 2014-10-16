@@ -1,21 +1,32 @@
 #ifndef EMB_CONFIG_H
 #define EMB_CONFIG_H
 
-typedef errval (*config_push_t) (void);
-typedef errval (*config_pop_t) (void);
+#include <nvm.h>
 
-typedef errval (*config_set_t) (word index, const void* data, size sz);
-typedef errval (*config_get_t) (word index, void* data, size sz);
+typedef errval (*config_push_func) (void);
+typedef errval (*config_pop_func) (void);
+
+typedef errval (*config_set_func) (word index, const void* data, size sz);
+typedef errval (*config_get_func) (word index, void* data, size sz);
+
+typedef errval (*config_set_nvm_driver_func) (struct IFaceNVM* drv);
+
+extern struct TypeDesc TypeDescConfig;
 
 extern struct ModuleConfig {
-    module_init_t init;
-    module_initialized_t initialized;
+    struct Type* type;
+    struct IFace* iface;
 
-    config_push_t push;
-    config_pop_t pop;
+    module_init_func init;
+    module_initialized_func initialized;
 
-    config_set_t set;
-    config_get_t get;
+    config_push_func push;
+    config_pop_func pop;
+
+    config_set_func set;
+    config_get_func get;
+
+    config_set_nvm_driver_func set_nvm_driver;
 } config;
 
 #endif
