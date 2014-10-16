@@ -11,7 +11,7 @@ RM:=rm -f
 
 .PHONY: all clean
 
-SOURCES:=$(wildcard ./*.c)
+SOURCES:=$(wildcard ./src/*.c)
 INT_OBJECTS:=$(SOURCES:%.c=%.o)
 EXT_OBJECTS:=$(EMB_OBJECTS)
 OBJECTS:=$(INT_OBJECTS) $(EXT_OBJECTS)

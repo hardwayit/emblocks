@@ -1,3 +1,4 @@
-EMB_TEST_CFLAGS:="-include$(EMBROOT)/common/test/test.h"
+EMB_TEST_ROOT:="$(EMBROOT)/common/test"
+EMB_TEST_CFLAGS:=-I"$(EMB_TEST_ROOT)/inc"
 EMB_TEST_LDFLAGS:=
-EMB_TEST_OBJECTS:="$(EMBROOT)/common/test/test.o"
+EMB_TEST_OBJECTS:=$(EMB_TEST_ROOT)/src/test.o

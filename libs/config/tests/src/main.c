@@ -1,12 +1,12 @@
 #include <config.h>
 
+#include <test.h>
+
+static char module_name[] = "config";
+
 int main(int argc, char* argv[])
 {
-    errval res;
-
-    if(res = config.init()) {
-        ;
-    }
+    TEST("", "Initialization module.", config.init() == ENO);
 
     return 0;
 }
