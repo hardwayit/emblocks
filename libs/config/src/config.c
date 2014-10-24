@@ -75,25 +75,44 @@ static errval pop (void)
     return ENO;
 }
 
-static errval set (word index, const void* data, size sz)
+static bool get_bank(size sz, bank *b);
+static errval find(bank b, const char* name, word* index);
+static errval find_free(bank b, word* index);
+static errval rset(bank b, word index, const char* name, const void* data, size sz);
+static errval rget(bank b, word index, void* data, size sz);
+
+static errval set (const char* name, const void* data, size sz)
 {
     bank b;
-    word rindex;
+    word index;
+    errval err;
 
     MODULE_CHECK_INITIALIZED
 
     if(!get_bank(sz, &b)) return EARG;
 
-    if(!find_free(b, &rindex)) return ENOMEM;
+    if(err = find(b, name, &index)) {
+        if(err = find_free(b, &index)) {
+            return err;
+        }
+    }
 
-    return rset(b, rindex, data, sz);
+    return rset(b, index, name, data, sz);
 }
 
-static errval get (word index, void* data, size sz)
+static errval get (const char* name, void* data, size sz)
 {
+    bank b;
+    word index;
+    errval err;
+
     MODULE_CHECK_INITIALIZED
 
-    return ENO;
+    if(!get_bank(sz, &b)) return EARG;
+
+    if(err = find(b, name, &index)) return ENOTEXIST;
+
+    return rget(b, index, data, sz);
 }
 
 static errval set_nvm_driver (struct IFaceNVM* drv)

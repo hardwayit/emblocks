@@ -3,13 +3,6 @@
 
 #include <nvm.h>
 
-typedef errval (*config_push_func) (void);
-typedef errval (*config_pop_func) (void);
-
-typedef errval (*config_set_func) (word index, const void* data, size sz);
-typedef errval (*config_get_func) (word index, void* data, size sz);
-
-typedef errval (*config_set_nvm_driver_func) (struct IFaceNVM* drv);
 
 extern struct TypeDesc TypeDescConfig;
 
@@ -17,16 +10,16 @@ extern struct ModuleConfig {
     struct Type* type;
     struct IFace* iface;
 
-    errval (*module_init_func init);
-    errval (*module_initialized_func initialized;
+    errval (*init) (void);
+    errval (*initialized) (void);
 
-    errval (*config_push_func) (void);
-    errval (*config_pop_func) (void);
+    errval (*push) (void);
+    errval (*pop) (void);
 
-    errval (*config_set_func) (word index, const void* data, size sz);
-    errval (*config_get_func) (word index, void* data, size sz);
+    errval (*set) (const char* name, const void* data, size sz);
+    errval (*get) (const char* name, void* data, size sz);
 
-    errval (*config_set_nvm_driver_func) (struct IFaceNVM* drv);
+    errval (*set_nvm_driver) (struct IFaceNVM* drv);
 } config;
 
 #endif
