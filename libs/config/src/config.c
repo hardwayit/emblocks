@@ -1,29 +1,29 @@
 #include <config.h>
 
 
-static errval __config_init (void);
-static bool __config_initialized (void);
+static errval init (void);
+static bool initialized (void);
 
-static errval __config_push (void);
-static errval __config_pop (void);
+static errval push (void);
+static errval pop (void);
 
-static errval __config_set (word index, const void* data, size sz);
-static errval __config_get (word index, void* data, size sz);
+static errval set (word index, const void* data, size sz);
+static errval get (word index, void* data, size sz);
 
-static errval __config_set_nvm_driver (struct IFaceNVM* drv);
+static errval set_nvm_driver (struct IFaceNVM* drv);
 
 struct TypeDesc TypeDescConfig = { "config" };
 
 struct ModuleConfig config = {
     .type           = &TypeDescConfig,
     .iface          = NULL,
-    .init           = &__config_init,
-    .initialized    = &__config_initialized,
-    .push           = &__config_push,
-    .pop            = &__config_pop,
-    .set            = &__config_set,
-    .get            = &__config_get,
-    .set_nvm_driver = &__config_set_nvm_driver
+    .init           = &init,
+    .initialized    = &initialized,
+    .push           = &push,
+    .pop            = &pop,
+    .set            = &set,
+    .get            = &get,
+    .set_nvm_driver = &set_nvm_driver
 };
 
 static struct {
@@ -33,7 +33,7 @@ static struct {
 } module;
 
 
-static errval __config_init (void)
+static errval init (void)
 {
     module.initialized = false;
 
@@ -44,12 +44,12 @@ static errval __config_init (void)
     return ENO;
 }
 
-static bool __config_initialized (void)
+static bool initialized (void)
 {
     return module.initialized;
 }
 
-static errval __config_push (void)
+static errval push (void)
 {
     MODULE_CHECK_INITIALIZED
 
@@ -62,7 +62,7 @@ static errval __config_push (void)
     return ENO;
 }
 
-static errval __config_pop (void)
+static errval pop (void)
 {
     MODULE_CHECK_INITIALIZED
 
@@ -75,21 +75,28 @@ static errval __config_pop (void)
     return ENO;
 }
 
-static errval __config_set (word index, const void* data, size sz)
+static errval set (word index, const void* data, size sz)
+{
+    bank b;
+    word rindex;
+
+    MODULE_CHECK_INITIALIZED
+
+    if(!get_bank(sz, &b)) return EARG;
+
+    if(!find_free(b, &rindex)) return ENOMEM;
+
+    return rset(b, rindex, data, sz);
+}
+
+static errval get (word index, void* data, size sz)
 {
     MODULE_CHECK_INITIALIZED
 
     return ENO;
 }
 
-static errval __config_get (word index, void* data, size sz)
-{
-    MODULE_CHECK_INITIALIZED
-
-    return ENO;
-}
-
-static errval __config_set_nvm_driver (struct IFaceNVM* drv)
+static errval set_nvm_driver (struct IFaceNVM* drv)
 {
     if(drv->iface != &IFaceDescNVM) {
         return ETYPE;

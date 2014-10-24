@@ -17,16 +17,16 @@ extern struct ModuleConfig {
     struct Type* type;
     struct IFace* iface;
 
-    module_init_func init;
-    module_initialized_func initialized;
+    errval (*module_init_func init);
+    errval (*module_initialized_func initialized;
 
-    config_push_func push;
-    config_pop_func pop;
+    errval (*config_push_func) (void);
+    errval (*config_pop_func) (void);
 
-    config_set_func set;
-    config_get_func get;
+    errval (*config_set_func) (word index, const void* data, size sz);
+    errval (*config_get_func) (word index, void* data, size sz);
 
-    config_set_nvm_driver_func set_nvm_driver;
+    errval (*config_set_nvm_driver_func) (struct IFaceNVM* drv);
 } config;
 
 #endif
