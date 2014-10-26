@@ -75,11 +75,78 @@ static errval pop (void)
     return ENO;
 }
 
-static bool get_bank(size sz, bank *b);
-static errval find(bank b, const char* name, word* index);
-static errval find_free(bank b, word* index);
-static errval rset(bank b, word index, const char* name, const void* data, size sz);
-static errval rget(bank b, word index, void* data, size sz);
+static bool get_bank(size sz, bank *b)
+{
+    if(sz == 0) return false;
+    else if(sz <= 4) { if(b) *b = BANK_DW; }
+    else if(sz <= 28) { if(b) *b = BANK_SHORT_BUF; }
+    else if(sz <= 60) { if(b) *b = BANK_LONG_BUF; }
+    else return false;
+
+    return true;
+}
+
+static errval e_find(bank b, const char* name, word* index)
+{
+    address offset = b_offset(b);
+    dword count = b_count(b);
+
+    for(dword i = 0; i < count; i++)
+    {
+        if(e_name_equals(b, i, name))
+        {
+            if(index) *index = offset + i;
+
+            return ENO;
+        }
+    }
+
+    return ENOTEXIST;
+}
+
+static errval e_find_free(bank b, word* index)
+{
+    address offset = b_offset(b);
+    dword count = b_count(b);
+
+    for(dword i = 0; i < count; i++)
+    {
+        if(e_is_free(b, i))
+        {
+            if(index) *index = offset + i;
+
+            return ENO;
+        }
+    }
+
+    return ENOMEM;
+}
+
+static errval e_set(bank b, word index, const char* name, const void* data, size sz)
+{
+    e_set_name(b, index, name);
+    e_set_data(b, index, data, sz);
+
+    return ENO;
+}
+
+static errval e_set_data(bank b, word index, const void* data, size sz)
+{
+    return kmemcpy(module.banks[b][index - b_offset(b)].data, data, sz);
+}
+
+static errval e_set_name(bank b, word index, const char* name)
+{
+    if(err = kmemcpy(module.banks[b][index - b_offset(b)].data, data, sz))
+    {
+        return err;
+    }
+}
+
+static errval e_get_data(bank b, word index, void* data, size sz)
+{
+    return kmemcpy(data, module.banks[b][index - b_offset(b)].data, sz);
+}
 
 static errval set (const char* name, const void* data, size sz)
 {
@@ -97,7 +164,7 @@ static errval set (const char* name, const void* data, size sz)
         }
     }
 
-    return rset(b, index, name, data, sz);
+    return e_set(b, index, name, data, sz);
 }
 
 static errval get (const char* name, void* data, size sz)
@@ -112,7 +179,7 @@ static errval get (const char* name, void* data, size sz)
 
     if(err = find(b, name, &index)) return ENOTEXIST;
 
-    return rget(b, index, data, sz);
+    return e_get(b, index, data, sz);
 }
 
 static errval set_nvm_driver (struct IFaceNVM* drv)
