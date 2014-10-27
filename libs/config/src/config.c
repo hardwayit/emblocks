@@ -75,15 +75,25 @@ static errval pop (void)
     return ENO;
 }
 
-static bool get_bank(size sz, bank *b)
+static bool b_i(size sz, bank *b)
 {
     if(sz == 0) return false;
-    else if(sz <= 4) { if(b) *b = BANK_DW; }
-    else if(sz <= 28) { if(b) *b = BANK_SHORT_BUF; }
-    else if(sz <= 60) { if(b) *b = BANK_LONG_BUF; }
+    else if(sz <= BANK_DW_ESIZE) { if(b) *b = BANK_DW; }
+    else if(sz <= BANK_12B_ESIZE) { if(b) *b = BANK_12B; }
+    else if(sz <= BANK_60B_ESIZE) { if(b) *b = BANK_60B; }
     else return false;
 
     return true;
+}
+
+address b_offset(bank b)
+{
+    switch(b)
+    {
+    case BANK_DW: return 0;
+    case BANK_12B: return BANK_DW_COUNT;
+    case BANK_60B: return BANK_DW_COUNT + BANK_12B_COUNT;
+    }
 }
 
 static errval e_find(bank b, const char* name, word* index)
@@ -122,14 +132,6 @@ static errval e_find_free(bank b, word* index)
     return ENOMEM;
 }
 
-static errval e_set(bank b, word index, const char* name, const void* data, size sz)
-{
-    e_set_name(b, index, name);
-    e_set_data(b, index, data, sz);
-
-    return ENO;
-}
-
 static errval e_set_data(bank b, word index, const void* data, size sz)
 {
     return kmemcpy(module.banks[b][index - b_offset(b)].data, data, sz);
@@ -137,18 +139,26 @@ static errval e_set_data(bank b, word index, const void* data, size sz)
 
 static errval e_set_name(bank b, word index, const char* name)
 {
-    dword name_sz = strlen(name);
+    char* e_name = module[b][index - b_offset(b)].name;
+    char* p;
 
-    strncpy(module.banks[b][index - b_offset(b)].name, name, MAX_NAME);
+    for(p = e_name; p-e_name < MAX_NAME && *name; *p++ = *name++);
+    while(p-e_name < MAX_NAME) *p++ = '\0';
 
-    if(rest =strlen(name)) for(dword i = 0; i < rest; i)
-    {
-    }
+    return ENO;
 }
 
 static errval e_get_data(bank b, word index, void* data, size sz)
 {
     return kmemcpy(data, module.banks[b][index - b_offset(b)].data, sz);
+}
+
+static errval e_set(bank b, word index, const char* name, const void* data, size sz)
+{
+    e_set_name(b, index, name);
+    e_set_data(b, index, data, sz);
+
+    return ENO;
 }
 
 static errval set (const char* name, const void* data, size sz)
@@ -159,7 +169,7 @@ static errval set (const char* name, const void* data, size sz)
 
     MODULE_CHECK_INITIALIZED
 
-    if(!get_bank(sz, &b)) return EARG;
+    if(!b_i(sz, &b)) return EARG;
 
     if(err = find(b, name, &index)) {
         if(err = find_free(b, &index)) {
@@ -178,7 +188,7 @@ static errval get (const char* name, void* data, size sz)
 
     MODULE_CHECK_INITIALIZED
 
-    if(!get_bank(sz, &b)) return EARG;
+    if(!b_i(sz, &b)) return EARG;
 
     if(err = find(b, name, &index)) return ENOTEXIST;
 
