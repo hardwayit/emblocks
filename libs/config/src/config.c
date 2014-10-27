@@ -137,9 +137,12 @@ static errval e_set_data(bank b, word index, const void* data, size sz)
 
 static errval e_set_name(bank b, word index, const char* name)
 {
-    if(err = kmemcpy(module.banks[b][index - b_offset(b)].data, data, sz))
+    dword name_sz = strlen(name);
+
+    strncpy(module.banks[b][index - b_offset(b)].name, name, MAX_NAME);
+
+    if(rest =strlen(name)) for(dword i = 0; i < rest; i)
     {
-        return err;
     }
 }
 
