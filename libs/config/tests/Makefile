@@ -1,13 +1,17 @@
 include $(EMBROOT)/common/makerules.mak
 include $(EMBROOT)/common/test/makerules.mak
 
-CFLAGS:=$(EMB_CFLAGS) $(EMB_TEST_CFLAGS)
-LDFLAGS:=$(EMB_LDFLAGS) $(EMB_TEST_LDFLAGS)
+EMB_LOCAL_CFLAGS=-I$(EMBROOT)/libs/string/inc -I$(EMBROOT)/libs/config/inc -I$(EMBROOT)/libs/nvm/inc
+
+CFLAGS:=$(EMB_CFLAGS) $(EMB_TEST_CFLAGS) $(EMB_LOCAL_CFLAGS)
+LDFLAGS:=$(EMB_LDFLAGS) $(EMB_TEST_LDFLAGS) $(EMB_LOCAL_LDFLAGS)
 
 CC:=gcc
 LD:=gcc
 ECHO:=echo
 RM:=rm -f
+
+TARGET=config-tests
 
 .PHONY: all clean
 

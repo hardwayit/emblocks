@@ -75,7 +75,7 @@ static errval pop (void)
     return ENO;
 }
 
-static bool b_i(size sz, bank *b)
+static bool b_i(size sz, byte *b)
 {
     if(sz == 0) return false;
     else if(sz <= BANK_DW_ESIZE) { if(b) *b = BANK_DW; }
@@ -86,7 +86,7 @@ static bool b_i(size sz, bank *b)
     return true;
 }
 
-address b_offset(bank b)
+address b_offset(byte b)
 {
     switch(b)
     {
@@ -96,7 +96,7 @@ address b_offset(bank b)
     }
 }
 
-static errval e_find(bank b, const char* name, word* index)
+static errval e_find(byte b, const char* name, word* index)
 {
     address offset = b_offset(b);
     dword count = b_count(b);
@@ -114,7 +114,7 @@ static errval e_find(bank b, const char* name, word* index)
     return ENOTEXIST;
 }
 
-static errval e_find_free(bank b, word* index)
+static errval e_find_free(byte b, word* index)
 {
     address offset = b_offset(b);
     dword count = b_count(b);
@@ -132,12 +132,12 @@ static errval e_find_free(bank b, word* index)
     return ENOMEM;
 }
 
-static errval e_set_data(bank b, word index, const void* data, size sz)
+static errval e_set_data(byte b, word index, const void* data, size sz)
 {
-    return kmemcpy(module.banks[b][index - b_offset(b)].data, data, sz);
+    return mem.cpy(module.banks[b][index - b_offset(b)].data, data, sz);
 }
 
-static errval e_set_name(bank b, word index, const char* name)
+static errval e_set_name(byte b, word index, const char* name)
 {
     char* e_name = module[b][index - b_offset(b)].name;
     char* p;
@@ -148,12 +148,12 @@ static errval e_set_name(bank b, word index, const char* name)
     return ENO;
 }
 
-static errval e_get_data(bank b, word index, void* data, size sz)
+static errval e_get_data(byte b, word index, void* data, size sz)
 {
-    return kmemcpy(data, module.banks[b][index - b_offset(b)].data, sz);
+    return mem.cpy(data, module.banks[b][index - b_offset(b)].data, sz);
 }
 
-static errval e_set(bank b, word index, const char* name, const void* data, size sz)
+static errval e_set(byte b, word index, const char* name, const void* data, size sz)
 {
     e_set_name(b, index, name);
     e_set_data(b, index, data, sz);
@@ -163,7 +163,7 @@ static errval e_set(bank b, word index, const char* name, const void* data, size
 
 static errval set (const char* name, const void* data, size sz)
 {
-    bank b;
+    byte b;
     word index;
     errval err;
 
@@ -171,8 +171,8 @@ static errval set (const char* name, const void* data, size sz)
 
     if(!b_i(sz, &b)) return EARG;
 
-    if(err = find(b, name, &index)) {
-        if(err = find_free(b, &index)) {
+    if(err = e_find(b, name, &index)) {
+        if(err = e_find_free(b, &index)) {
             return err;
         }
     }
@@ -182,7 +182,7 @@ static errval set (const char* name, const void* data, size sz)
 
 static errval get (const char* name, void* data, size sz)
 {
-    bank b;
+    byte b;
     word index;
     errval err;
 
@@ -190,7 +190,7 @@ static errval get (const char* name, void* data, size sz)
 
     if(!b_i(sz, &b)) return EARG;
 
-    if(err = find(b, name, &index)) return ENOTEXIST;
+    if(err = e_find(b, name, &index)) return ENOTEXIST;
 
     return e_get(b, index, data, sz);
 }
