@@ -203,7 +203,7 @@ void emmc_init(void)
     emmc_session_stop();
 
     #ifdef EMMC_DEBUG
-	debug_printf(EMMC_DEBUG_LVL, "CMD0 SENDED.\r\n");
+	debug_printf(EMMC_DEBUG_LVL, "CMD0 sended.\r\n");
     #endif
 
 	emmc_delay_us(100);
@@ -216,17 +216,17 @@ void emmc_init(void)
 		emmc_send_cmd(1, 0x40FF8080);
 
         #ifdef EMMC_DEBUG
-		debug_printf(EMMC_DEBUG_LVL, "CMD1 SENDED.\r\n");
+		debug_printf(EMMC_DEBUG_LVL, "CMD1 sended.\r\n");
         #endif
 
 		if((res = emmc_receive_status())) {
             #ifdef EMMC_DEBUG
-			debug_printf(EMMC_DEBUG_LVL, "RECEIVING STATUS TIMEOUT %d\r\n", res);
+			debug_printf(EMMC_DEBUG_LVL, "Receive error [%d]\r\n", res);
             #endif
 		}
 		else {
             #ifdef EMMC_DEBUG
-            debug_printf(EMMC_DEBUG_LVL, "MMC STATUS: 0x%x 0x%x 0x%x 0x%x\r\n", emmc.status[3], emmc.status[2], emmc.status[1], emmc.status[0]);
+            debug_printf(EMMC_DEBUG_LVL, "eMMC status: 0x%02x 0x%02x 0x%02x 0x%02x\r\n", emmc.status[3], emmc.status[2], emmc.status[1], emmc.status[0]);
             #endif
         }
 
