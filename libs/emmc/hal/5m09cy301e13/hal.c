@@ -1,4 +1,4 @@
-#include "emmc/hal/5m09cy301e13/hal.h"
+#include "emmc/hal/hal.h"
 
 #include <cyu3system.h>
 #include <cyu3os.h>

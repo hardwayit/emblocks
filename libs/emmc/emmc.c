@@ -1,6 +1,13 @@
 #include "emmc/emmc.h"
+#include "emmc/hal/hal.h"
 #include "leds/leds.h"
 #include "crc/crc7.h"
+
+#ifdef EMMC_DEBUG
+#include "debug/debug.h"
+
+#define EMMC_DEBUG_LVL 4
+#endif
 
 #define EMMC_NID 5
 
@@ -46,7 +53,9 @@ static void emmc_line_cmd_putb(char bit)
 	emmc_line_cmd_set(bit);
 	emmc_delay_us(1);
 
-	// CyU3PDebugPrint(4, "%d", bit);
+    // #ifdef EMMC_DEBUG
+	// debug_printf(EMMC_DEBUG_LVL, "%d", bit);
+    // #endif
 }
 
 static char emmc_line_cmd_getb(void)
@@ -59,7 +68,9 @@ static char emmc_line_cmd_getb(void)
 	bit = emmc_line_cmd_get();
 	emmc_delay_us(1);
 
-	// CyU3PDebugPrint(4, "[%d]\r\n", bit);
+    // #ifdef EMMC_DEBUG
+	// debug_printf(EMMC_DEBUG_LVL, "[%d]\r\n", bit);
+    // #endif
 
 	return bit;
 }
@@ -191,7 +202,9 @@ void emmc_init(void)
 	emmc_send_cmd(0, 0x00000000);// reset to IDLE
     emmc_session_stop();
 
-	CyU3PDebugPrint(0, "CMD0 SENDED.\r\n");
+    #ifdef EMMC_DEBUG
+	debug_printf(EMMC_DEBUG_LVL, "CMD0 SENDED.\r\n");
+    #endif
 
 	emmc_delay_us(100);
 
@@ -201,12 +214,21 @@ void emmc_init(void)
 
         emmc_session_start();
 		emmc_send_cmd(1, 0x40FF8080);
-		CyU3PDebugPrint(0, "CMD1 SENDED.\r\n");
+
+        #ifdef EMMC_DEBUG
+		debug_printf(EMMC_DEBUG_LVL, "CMD1 SENDED.\r\n");
+        #endif
 
 		if((res = emmc_receive_status())) {
-			CyU3PDebugPrint(4, "RECEIVING STATUS TIMEOUT %d\r\n", res);
+            #ifdef EMMC_DEBUG
+			debug_printf(EMMC_DEBUG_LVL, "RECEIVING STATUS TIMEOUT %d\r\n", res);
+            #endif
 		}
-		else CyU3PDebugPrint(4, "MMC STATUS: 0x%x 0x%x 0x%x 0x%x\r\n", emmc.status[3], emmc.status[2], emmc.status[1], emmc.status[0]);
+		else {
+            #ifdef EMMC_DEBUG
+            debug_printf(EMMC_DEBUG_LVL, "MMC STATUS: 0x%x 0x%x 0x%x 0x%x\r\n", emmc.status[3], emmc.status[2], emmc.status[1], emmc.status[0]);
+            #endif
+        }
 
         emmc_session_stop();
 
