@@ -5,7 +5,7 @@
 #include <cyu3error.h>
 #include <cyu3gpio.h>
 
-#define LED_RED_GPIO 38
+#define LED_RED_GPIO 36//38
 #define LED_GREEN_GPIO 39
 
 extern void
@@ -38,7 +38,7 @@ void led_set(unsigned char led, char value)
 
 }
 
-void led_init(void)
+bool led_init(void)
 {
 	CyU3PGpioSimpleConfig_t gpioConfig;
     CyU3PReturnStatus_t apiRetStatus = CY_U3P_SUCCESS;
@@ -54,7 +54,8 @@ void led_init(void)
 		/* Error handling */
 		CyU3PDebugPrint (4, "CyU3PGpioSetSimpleConfig failed, error code = %d\n",
 				apiRetStatus);
-		CyFxAppErrorHandler(apiRetStatus);
+
+        return false;
 	}
 
 	gpioConfig.outValue = CyTrue;
@@ -68,9 +69,12 @@ void led_init(void)
 		/* Error handling */
 		CyU3PDebugPrint (4, "CyU3PGpioSetSimpleConfig failed, error code = %d\n",
 				apiRetStatus);
-		CyFxAppErrorHandler(apiRetStatus);
+
+        return false;
 	}
 
 	led_set(LED_RED, 0);
 	led_set(LED_GREEN, 0);
+
+    return true;
 }

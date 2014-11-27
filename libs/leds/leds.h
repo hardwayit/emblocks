@@ -11,7 +11,7 @@
 #define LED_RED 0
 #define LED_GREEN 1
 
-void led_init(void);
+bool led_init(void);
 void led_set(unsigned char led, char value);
 
 

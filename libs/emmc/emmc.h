@@ -8,10 +8,15 @@
 #ifndef EMMC_H_
 #define EMMC_H_
 
-void emmc_init(void);
+#ifdef EMMC_DEBUG
+#define EMMC_DEBUG_LVL 4
+#endif
 
-void emmc_send_cmd(unsigned char cmd, unsigned int arg);
+const char* emmc_state_name[11];
 
-void emmc_get_status(unsigned int *status);
+bool emmc_init(void);
+char emmc_card_status(unsigned short rca);
+char emmc_card_select(unsigned short rca);
+
 
 #endif /* EMMC_H_ */
