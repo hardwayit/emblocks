@@ -19,6 +19,7 @@ char emmc_card_status(unsigned short rca);
 char emmc_card_select(unsigned short rca);
 char emmc_switch(unsigned char index, unsigned char value, unsigned char cmdset);
 char emmc_blocklen_set(unsigned int len);
+char emmc_blockcount_set(unsigned int count);
 char emmc_read_single_block(unsigned int iblock, unsigned char* buf);
 char emmc_write_single_block(unsigned int iblock, const unsigned char* buf);
 

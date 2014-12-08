@@ -27,10 +27,7 @@ void emmc_line_clk_set(char val);
 void emmc_line_dq_putb(char bit);
 char emmc_line_dq_getb(void);
 
-extern void
-CyFxAppErrorHandler (
-        CyU3PReturnStatus_t apiRetStatus    /* API return status */
-        );
+extern void CyFxAppErrorHandler(CyU3PReturnStatus_t apiRetStatus);    /* API return status */
 
 
 void emmc_delay_ms(unsigned int us)
@@ -61,12 +58,12 @@ bool emmc_hal_init(void)
     if(emmc_gpif_init())
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "GPIF II initialized.\r\n");
+        debug_printf(EMMC_DEBUG_LVL, "GPIF II initialized.\n");
         #endif
     }
     else {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "GPIF II initialization failed.\r\n");
+        debug_printf(EMMC_DEBUG_LVL, "GPIF II initialization failed.\n");
         #endif
     }
 
@@ -77,7 +74,7 @@ bool emmc_hal_init(void)
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "CMD0 sending error.\r\n");
+        debug_printf(EMMC_DEBUG_LVL, "CMD0 sending error.\n");
         #endif
 
         while(1);
@@ -85,7 +82,7 @@ bool emmc_hal_init(void)
     else
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "CMD0 sended.\r\n");
+        debug_printf(EMMC_DEBUG_LVL, "CMD0 sended.\n");
         #endif
     }
 
@@ -99,18 +96,18 @@ bool emmc_hal_init(void)
 
 		if(res) {
             #ifdef EMMC_DEBUG
-			debug_printf(EMMC_DEBUG_LVL, "Receive error [%d]\r\n", res);
+			debug_printf(EMMC_DEBUG_LVL, "Receive error [%d]\n", res);
             #endif
 		}
 		else {
             res = emmc_receive_ocr(ocr);
 
             #ifdef EMMC_DEBUG
-            debug_printf(EMMC_DEBUG_LVL, "CMD1 sended.\r\n");
+            debug_printf(EMMC_DEBUG_LVL, "CMD1 sended.\n");
             #endif
 
             #ifdef EMMC_DEBUG
-            debug_printf(EMMC_DEBUG_LVL, "eMMC ocr: 0x%02x 0x%02x 0x%02x 0x%02x [%d]\r\n", ocr[3], ocr[2], ocr[1], ocr[0], res);
+            debug_printf(EMMC_DEBUG_LVL, "eMMC ocr: 0x%02x 0x%02x 0x%02x 0x%02x [%d]\n", ocr[3], ocr[2], ocr[1], ocr[0], res);
             #endif
 
             if(ocr[3] & 0x80) break;
@@ -130,7 +127,7 @@ bool emmc_hal_init(void)
         if(res)
         {
             #ifdef EMMC_DEBUG
-            debug_printf(EMMC_DEBUG_LVL, "eMMC read CID error [%d]\r\n", res);
+            debug_printf(EMMC_DEBUG_LVL, "eMMC read CID error [%d]\n", res);
             #endif
 
             if(res == 1 || res == 2) break;
@@ -143,7 +140,7 @@ bool emmc_hal_init(void)
 
             #ifdef EMMC_DEBUG
             debug_printf(EMMC_DEBUG_LVL,
-                "eMMC CID: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x [%d]\r\n",
+                "eMMC CID: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x [%d]\n",
                 cid[15], cid[14], cid[13], cid[12], cid[11], cid[10], cid[ 9], cid[ 8],
                 cid[ 7], cid[ 6], cid[ 5], cid[ 4], cid[ 3], cid[ 2], cid[ 1], cid[ 0], res);
             #endif
@@ -156,7 +153,7 @@ bool emmc_hal_init(void)
         if(res)
         {
             #ifdef EMMC_DEBUG
-            debug_printf(EMMC_DEBUG_LVL, "eMMC read status error [%d]\r\n", res);
+            debug_printf(EMMC_DEBUG_LVL, "eMMC read status error [%d]\n", res);
             #endif
 
             goto w_continue;
@@ -169,7 +166,7 @@ bool emmc_hal_init(void)
 
             #ifdef EMMC_DEBUG
             debug_printf(EMMC_DEBUG_LVL,
-                         "eMMC set relative addr for card %d OK (status=%02x%02x%02x%02x) [%d]\r\n",
+                         "eMMC set relative addr for card %d OK (status=%02x%02x%02x%02x) [%d]\n",
                          emmc.ncards, emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
             #endif
         }
@@ -304,7 +301,7 @@ bool emmc_gpif_init(void)
     CyU3PPibClock_t pibClock;
     CyU3PReturnStatus_t stat;
 
-    pibClock.clkDiv      = 1023;
+    pibClock.clkDiv      = 1024;
     pibClock.clkSrc      = CY_U3P_SYS_CLK_BY_16;
     pibClock.isHalfDiv   = CyFalse;
     pibClock.isDllEnable = CyFalse;
@@ -418,7 +415,7 @@ char emmc_line_dq_getb(void)
 	bit = emmc_line_dq_get();
 
     // #ifdef EMMC_DEBUG
-	// debug_printf(EMMC_DEBUG_LVL, "[%d]\r\n", bit);
+	// debug_printf(EMMC_DEBUG_LVL, "[%d]\n", bit);
     // #endif
 
 	return bit;
@@ -459,7 +456,7 @@ char emmc_send_cmd(unsigned char cmd, unsigned int arg, char dat_dir)
 
     if(n == 0) {
         #ifdef EMMC_DEBUG
-        debug_printf(0, "emmc_send_cmd(%d): sending cmd timeout!\r\n", cmd);
+        debug_printf(0, "emmc_send_cmd(%d): sending cmd timeout!\n", cmd);
         #endif
 
         return 1;
@@ -543,7 +540,7 @@ char emmc_card_status(unsigned short rca)
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d read status error [%d]\r\n", rca, res);
+        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d read status error [%d]\n", rca, res);
         #endif
     }
     else
@@ -551,12 +548,12 @@ char emmc_card_status(unsigned short rca)
         res = emmc_receive_status();
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d status=%02x%02x%02x%02x [%d]\r\n", rca,
+        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d status=%02x%02x%02x%02x [%d]\n", rca,
             emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
         #endif
     }
 
-    return res == 0;
+    return res;
 }
 
 char emmc_card_select(unsigned short rca)
@@ -568,7 +565,7 @@ char emmc_card_select(unsigned short rca)
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d select error [%d]\r\n", rca, res);
+        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d select error [%d]\n", rca, res);
         #endif
 
         return 1;
@@ -578,7 +575,7 @@ char emmc_card_select(unsigned short rca)
         res = emmc_receive_status();
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d status=%02x%02x%02x%02x [%d]\r\n", rca,
+        debug_printf(EMMC_DEBUG_LVL, "eMMC card #%d status=%02x%02x%02x%02x [%d]\n", rca,
             emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
         #endif
     }
@@ -598,7 +595,7 @@ char emmc_switch(unsigned char index, unsigned char value, unsigned char cmdset)
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\r\n", emmc.curcard, cmd, res);
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\n", emmc.curcard, cmd, res);
         #endif
 
         return 1;
@@ -608,7 +605,7 @@ char emmc_switch(unsigned char index, unsigned char value, unsigned char cmdset)
         res = emmc_receive_status();
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\r\n", emmc.curcard, cmd,
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\n", emmc.curcard, cmd,
             emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
         #endif
     }
@@ -626,7 +623,7 @@ char emmc_blocklen_set(unsigned int len)
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\r\n", emmc.curcard, cmd, res);
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\n", emmc.curcard, cmd, res);
         #endif
 
         return 1;
@@ -636,12 +633,42 @@ char emmc_blocklen_set(unsigned int len)
         res = emmc_receive_status();
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\r\n", emmc.curcard, cmd,
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\n", emmc.curcard, cmd,
             emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
         #endif
     }
 
     emmc.blocklen = len;
+
+    return 0;
+}
+
+char emmc_blockcount_set(unsigned int count)
+{
+    char res;
+    unsigned char cmd = 23;
+
+    res = emmc_send_cmd(cmd, count, 0);
+
+    if(res)
+    {
+        #ifdef EMMC_DEBUG
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\n", emmc.curcard, cmd, res);
+        #endif
+
+        return 1;
+    }
+    else
+    {
+        res = emmc_receive_status();
+
+        #ifdef EMMC_DEBUG
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\n", emmc.curcard, cmd,
+            emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
+        #endif
+    }
+
+    emmc.blockcount = count;
 
     return 0;
 }
@@ -655,10 +682,9 @@ static EMMCCallback_t callback = 0;
 static void emmc_hal_callback(CyU3PDmaChannel *handle, CyU3PDmaCbType_t cbType, CyU3PDmaCBInput_t *cbInput)
 {
     if(callback) callback(cbInput->buffer_p.buffer, cbInput->buffer_p.count);
-    debug_printf(0, "asdf");
 }
 
-void emmc_hal_read_start(EMMCCallback_t cb)
+char emmc_hal_read_start(EMMCCallback_t cb)
 {
     CyU3PReturnStatus_t stat;
     CyU3PDmaChannelConfig_t dmaCfg;
@@ -666,8 +692,8 @@ void emmc_hal_read_start(EMMCCallback_t cb)
     /* Create a DMA AUTO channel for the GPIF to USB transfer. */
     CyU3PMemSet ((uint8_t *)&dmaCfg, 0, sizeof (dmaCfg));
 
-    dmaCfg.size           = 32;
-    dmaCfg.count          = 0;
+    dmaCfg.size           = 512;
+    dmaCfg.count          = 1;
     dmaCfg.prodSckId      = CY_U3P_PIB_SOCKET_0;
     dmaCfg.consSckId      = CY_U3P_CPU_SOCKET_CONS;
     dmaCfg.prodAvailCount = 0;
@@ -684,6 +710,9 @@ void emmc_hal_read_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL read_start DMA channel create failed\n");
+
+        return 1;
     }
 
         /* Start the GPIF state machine off. */
@@ -691,7 +720,12 @@ void emmc_hal_read_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start Gpif start failed\n");
+
+        return 2;
     }
+
+    return 0;
 }
 
 void emmc_hal_read_end(void)
@@ -701,7 +735,7 @@ void emmc_hal_read_end(void)
     CyU3PGpifDisable(CyFalse);
 }
 
-void emmc_hal_read_commit(uint8_t* buf, uint32_t size, uint32_t count)
+char emmc_hal_read_commit(uint8_t* buf, uint32_t size, uint32_t count)
 {
     CyU3PReturnStatus_t stat;
 
@@ -714,7 +748,12 @@ void emmc_hal_read_commit(uint8_t* buf, uint32_t size, uint32_t count)
 
     if(stat != CY_U3P_SUCCESS)
     {
+        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL read_commit setuprecvbuffer failed.\n");
+
+        return 1;
     }
+
+    return 0;
 }
 
 char emmc_hal_write_start(EMMCCallback_t cb)
@@ -743,7 +782,7 @@ char emmc_hal_write_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
-        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start DMA channel create failed\r\n");
+        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start DMA channel create failed\n");
 
         return 1;
     }
@@ -753,7 +792,7 @@ char emmc_hal_write_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
-        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start Gpif start failed\r\n");
+        debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start Gpif start failed\n");
 
         return 2;
     }
@@ -768,7 +807,7 @@ void emmc_hal_write_end(void)
     CyU3PGpifDisable(CyFalse);
 }
 
-static CyU3PDmaBuffer_t _buffer __attribute__ ((aligned (32)));
+static CyU3PDmaBuffer_t _buffer __attribute__ ((aligned (4096)));
 
 void emmc_hal_write_commit(uint8_t* buf, uint32_t size, uint32_t count)
 {
@@ -780,10 +819,11 @@ void emmc_hal_write_commit(uint8_t* buf, uint32_t size, uint32_t count)
     _buffer.status = 0;
 
     stat = CyU3PDmaChannelSetupSendBuffer(&eMMCDMAChHandle, &_buffer);// TODO: restrictions!!!
+    led_set(1, 1);
 
     if(stat != CY_U3P_SUCCESS)
     {
-        debug_printf(0, "Write commit Err\r\n");
+        debug_printf(0, "Write commit Err\n");
     }
 }
 
@@ -792,12 +832,13 @@ void emmc_hal_trans_wait_complete(uint32_t wait)
     CyU3PReturnStatus_t stat;
 
     stat = CyU3PDmaChannelWaitForCompletion(&eMMCDMAChHandle, wait);
+    led_set(1, 0);
 
     if (stat != CY_U3P_SUCCESS)
     {
-        debug_printf(0, "wait timeout\r\n");
+        debug_printf(0, "wait timeout\n");
     }
-    else debug_printf(0, "wait OK\r\n");
+    else debug_printf(0, "wait OK\n");
 }
 
 char emmc_read_single_block(unsigned int iblock, unsigned char* buf)
@@ -805,32 +846,41 @@ char emmc_read_single_block(unsigned int iblock, unsigned char* buf)
     char res;
     unsigned char cmd = 17;
 
-    emmc_hal_read_start(0);
-    emmc_hal_read_commit(buf, 512, 512);
+    res = emmc_hal_read_start(0);
+
+    if(res)
+    {
+        return 1;
+    }
+
+    res = emmc_hal_read_commit(buf, 1024, 1+512+16+1);
+
+    if(res)
+    {
+        return 2;
+    }
 
     res = emmc_send_cmd(cmd, iblock*512, 0); 
-    led_set(0, 0);
-    led_set(1, 0);
 
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\r\n", emmc.curcard, cmd, res);
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\n", emmc.curcard, cmd, res);
         #endif
 
-        return 1;
+        return 3;
     }
     else
     {
         res = emmc_receive_status();
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\r\n", emmc.curcard, cmd,
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\n", emmc.curcard, cmd,
             emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
         #endif
     }
 
-    emmc_hal_trans_wait_complete(10000);
+    emmc_hal_trans_wait_complete(1000);
     
     emmc_hal_read_end();
 
@@ -875,6 +925,7 @@ void crc16_8x(const unsigned char *dt, unsigned int count, unsigned char* crc)
 
 char emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 {
+    int i;
     char res;
     unsigned char cmd = 24;
 
@@ -886,7 +937,7 @@ char emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
     }
 
     _buf[0] = 0x00;// start byte
-    memcpy(_buf+1, buf, 512);
+    for(i = 0; i < 512; i++) _buf[1+i] = buf[i];
 
     crc16_8x(_buf+1, 512, crc);
 
@@ -909,13 +960,11 @@ char emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
     _buf[1 + 512 + 16] = 0xFF;// stop byte
 
     res = emmc_send_cmd(cmd, iblock*512, 0);// Write single block 
-    led_set(0, 1);
-    led_set(1, 1);
 
     if(res)
     {
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\r\n", emmc.curcard, cmd, res);
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error [%d]\n", emmc.curcard, cmd, res);
         #endif
 
         return 1;
@@ -925,20 +974,37 @@ char emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
         res = emmc_receive_status();
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\r\n", emmc.curcard, cmd,
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d OK status=%02x%02x%02x%02x [%d]\n", emmc.curcard, cmd,
             emmc.status.b[3], emmc.status.b[2], emmc.status.b[1], emmc.status.b[0], res);
         #endif
     }
 
-    emmc_hal_write_commit(_buf, 512+32, 1+512+16+1);
+    emmc_hal_write_commit(_buf, 1024, 1+512+16+1);
 
     emmc_hal_trans_wait_complete(1000);
 
     emmc_hal_write_end();
 
     #ifdef EMMC_DEBUG
-    debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write OK\r\n", emmc.curcard);
+    debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write OK\n", emmc.curcard);
     #endif
+
+    emmc_delay_ms(1);
+
+    for(i = 0; i < 2000; i++) {
+        emmc_card_status(1);
+        if(emmc.status.fields.current_state == 4) break;
+
+        emmc_delay_ms(1);
+    }
+
+    if(i == 2000) {
+        #ifdef EMMC_DEBUG
+        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write timeout.\n", emmc.curcard);
+        #endif
+        
+        return 3;
+    }
 
     return 0;
 }

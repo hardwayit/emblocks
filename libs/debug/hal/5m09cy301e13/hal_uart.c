@@ -423,6 +423,7 @@ static void
 uart_putchar(int c, void *arg)
 {
     CyU3PReturnStatus_t status;
+    if(c == '\n') c = '\r';
     CyU3PUartTransmitBytes((unsigned char*)&c, 1, &status);
 }
 
