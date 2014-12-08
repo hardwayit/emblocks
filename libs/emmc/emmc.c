@@ -68,24 +68,20 @@ bool emmc_init(void)
         return false;
     }
 
-    memcpy(buf, "\x33\x22\x11\x88\x99", 5);
+    //memcpy(buf, "\x33\x22\x11\x88\x99", 5);
 
-    emmc_write_single_block(0, buf);
+    //emmc_write_single_block(0, buf);
 
-    memset(buf, 0xA5, 512);
+    //memset(buf, 0xA5, 512);
 
-    emmc_read_single_block(0, buf);
+    //emmc_read_single_block(0, buf);
 
-    for(i = 0; i < 32; i++)
-        debug_printf(0, "%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\n",
-                     buf[i*16+ 0], buf[i*16+ 1], buf[i*16+ 2], buf[i*16+ 3],
-                     buf[i*16+ 4], buf[i*16+ 5], buf[i*16+ 6], buf[i*16+ 7],
-                     buf[i*16+ 8], buf[i*16+ 9], buf[i*16+10], buf[i*16+11],
-                     buf[i*16+12], buf[i*16+13], buf[i*16+14], buf[i*16+15]);
-
-    emmc_delay_ms(3000);
-
-    CyU3PDeviceReset(0);
+    //for(i = 0; i < 32; i++)
+    //    debug_printf(0, "%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\n",
+    //                 buf[i*16+ 0], buf[i*16+ 1], buf[i*16+ 2], buf[i*16+ 3],
+    //                 buf[i*16+ 4], buf[i*16+ 5], buf[i*16+ 6], buf[i*16+ 7],
+    //                 buf[i*16+ 8], buf[i*16+ 9], buf[i*16+10], buf[i*16+11],
+    //                 buf[i*16+12], buf[i*16+13], buf[i*16+14], buf[i*16+15]);
 
     return true;
 }

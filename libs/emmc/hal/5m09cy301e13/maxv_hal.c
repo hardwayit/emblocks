@@ -710,7 +710,9 @@ char emmc_hal_read_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC HAL read_start DMA channel create failed\n");
+        #endif
 
         return 1;
     }
@@ -720,7 +722,9 @@ char emmc_hal_read_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start Gpif start failed\n");
+        #endif
 
         return 2;
     }
@@ -748,7 +752,9 @@ char emmc_hal_read_commit(uint8_t* buf, uint32_t size, uint32_t count)
 
     if(stat != CY_U3P_SUCCESS)
     {
+        #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC HAL read_commit setuprecvbuffer failed.\n");
+        #endif
 
         return 1;
     }
@@ -782,7 +788,9 @@ char emmc_hal_write_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start DMA channel create failed\n");
+        #endif
 
         return 1;
     }
@@ -792,7 +800,9 @@ char emmc_hal_write_start(EMMCCallback_t cb)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start Gpif start failed\n");
+        #endif
 
         return 2;
     }
@@ -836,9 +846,16 @@ void emmc_hal_trans_wait_complete(uint32_t wait)
 
     if (stat != CY_U3P_SUCCESS)
     {
+        #ifdef EMMC_DEBUG
         debug_printf(0, "wait timeout\n");
+        #endif
     }
-    else debug_printf(0, "wait OK\n");
+    else
+    {
+        #ifdef EMMC_DEBUG
+        debug_printf(0, "wait OK\n");
+        #endif
+    }
 }
 
 char emmc_read_single_block(unsigned int iblock, unsigned char* buf)
