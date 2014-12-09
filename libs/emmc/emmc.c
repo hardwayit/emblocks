@@ -22,66 +22,42 @@ const char* emmc_state_name[] = {
     "slp"
 };
 
-unsigned char buf[1024] __attribute__ ((aligned (4096)));
-
 bool emmc_init(void)
 {
-    char res;
     int i;
 
     emmc.curcard = 0xFFFF;
     emmc.blocklen = 0;
+    emmc.blockcount = 0;
 
     if(!emmc_hal_init()) return false;
 
-    if((res = emmc_card_select(1))) {
-        #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "Card %d selection error [%d]\n", 1, res);
-        #endif
-
+    if(!emmc_card_select(1)) {
         return false;
     }
     else {
-        #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "Card %d selected [%d]\n", 1, res);
-        #endif
     }
 
     for(i = 1; i <= emmc.ncards; i++)
     {
-        if(emmc_card_status(i)) continue;
+        if(!emmc_card_status(i)) continue;
 
         #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "Card %d current state: %s\n", i, emmc_state_name[emmc.status.fields.current_state]);
         #endif
     }
 
-    if((res = emmc_switch(0xB7, 0x02, 0x00))) {
+    if(!emmc_switch(0xB7, 0x02, 0x00)) {
         return false;
     }
 
-    if((res = emmc_blocklen_set(512))) {
+    if(!emmc_blocklen_set(512)) {
         return false;
     }
 
-    if((res = emmc_blockcount_set(1))) {
+    if(!emmc_blockcount_set(1)) {
         return false;
     }
-
-    //memcpy(buf, "\x33\x22\x11\x88\x99", 5);
-
-    //emmc_write_single_block(0, buf);
-
-    //memset(buf, 0xA5, 512);
-
-    //emmc_read_single_block(0, buf);
-
-    //for(i = 0; i < 32; i++)
-    //    debug_printf(0, "%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\n",
-    //                 buf[i*16+ 0], buf[i*16+ 1], buf[i*16+ 2], buf[i*16+ 3],
-    //                 buf[i*16+ 4], buf[i*16+ 5], buf[i*16+ 6], buf[i*16+ 7],
-    //                 buf[i*16+ 8], buf[i*16+ 9], buf[i*16+10], buf[i*16+11],
-    //                 buf[i*16+12], buf[i*16+13], buf[i*16+14], buf[i*16+15]);
 
     return true;
 }

@@ -6,10 +6,10 @@
  * Software eMMC Software HAL interface:
  */
 
-char emmc_send_cmd(unsigned char cmd, unsigned int arg, char dat_dir);
-char emmc_receive_ocr(unsigned char* ocr);
-char emmc_receive_cid(unsigned char* cid);
-char emmc_receive_status(void);
+bool emmc_send_cmd(unsigned char cmd, unsigned int arg, char dat_dir);
+bool emmc_receive_ocr(unsigned char* ocr);
+bool emmc_receive_cid(unsigned char* cid);
+bool emmc_receive_status(void);
 
 /* -------------------------- */
 
