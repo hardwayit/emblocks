@@ -1,14 +1,18 @@
+#define __MODULE__ "emmc"
+
 #include <emmc/emmc.h>
 #include <emmc/hal/hal.h>
+#include <error/error.h>
 
 #ifdef EMMC_DEBUG
-#include <debug/debug.h>
+  #include <debug/debug.h>
 #endif
 
 
 struct EMMC emmc;
 
-const char* emmc_state_name[] = {
+
+const char* state_name[] = {
     "idle",
     "ready",
     "ident",
@@ -22,6 +26,15 @@ const char* emmc_state_name[] = {
     "slp"
 };
 
+const unsigned int state_name_count = sizeof(state_name)/sizeof(state_name[0]);
+
+
+const char* emmc_state_name(unsigned char state)
+{
+    if(state >= state_name_count) error_critical("Bad state name.", 0);
+    return state_name[state];
+}
+
 bool emmc_init(void)
 {
     int i;
@@ -33,9 +46,8 @@ bool emmc_init(void)
     if(!emmc_hal_init()) return false;
 
     if(!emmc_card_select(1)) {
+        error_msg("Error selecting card.\n", 0);
         return false;
-    }
-    else {
     }
 
     for(i = 1; i <= emmc.ncards; i++)
@@ -48,14 +60,17 @@ bool emmc_init(void)
     }
 
     if(!emmc_switch(0xB7, 0x02, 0x00)) {
+        error_msg("Error invoking switch command.\n", 0);
         return false;
     }
 
     if(!emmc_blocklen_set(512)) {
+        error_msg("Error invoking set block length command.\n", 0);
         return false;
     }
 
     if(!emmc_blockcount_set(1)) {
+        error_msg("Error invoking set block count command.\n", 0);
         return false;
     }
 

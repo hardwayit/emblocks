@@ -1,3 +1,5 @@
+#define __MODULE__ "debug"
+
 #include <debug/debug.h>
 #include <debug/hal/hal.h>
 
