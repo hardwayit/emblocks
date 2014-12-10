@@ -940,6 +940,15 @@ void crc16_8x(const unsigned char *dt, unsigned int count, unsigned char* crc)
     }
 }
 
+bool emmc_tran_busy(void)
+{
+    CyBool_t val;
+
+    CyU3PGetValue(0, &val);
+
+    return val == CyFalse;
+}
+
 bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 {
     int i;
@@ -974,7 +983,7 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
     _buf[1 + 512 + 15] = crc[ 0];
     _buf[1 + 512 + 16] = 0xFF;// stop byte
 
-    if(!emmc_send_cmd(cmd, iblock, 0, (timeout=100,&timeout)))// Write single block
+    if(!emmc_send_cmd(cmd, iblock, 0, (timeout=10,&timeout)))// Write single block
     {
         #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error\n", emmc.curcard, cmd);
@@ -994,7 +1003,7 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 
     emmc_hal_write_commit(_buf, 1024, 1+512+16+1);
 
-    emmc_hal_trans_wait_complete(1000);
+    emmc_hal_trans_wait_complete(300);
 
     emmc_hal_write_end();
 
@@ -1004,19 +1013,20 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 
     emmc_delay_ms(1);
 
-    for(i = 0; i < 2000; i++) {
-        emmc_card_status(1);
-        if(emmc.status.fields.current_state == 4) break;
+    if(emmc_tran_busy())
+    {
+        for(i = 2000; i > 0; i++) {
+            if(!emmc_tran_busy()) break;
+            emmc_delay_ms(1);
+        }
 
-        emmc_delay_ms(1);
-    }
-
-    if(i == 2000) {
-        #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write timeout.\n", emmc.curcard);
-        #endif
-        
-        return false;
+        if(i == 0) {
+            #ifdef EMMC_DEBUG
+            debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write timeout.\n", emmc.curcard);
+            #endif
+            
+            return false;
+        }
     }
 
     return true;
