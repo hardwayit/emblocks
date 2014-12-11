@@ -774,7 +774,7 @@ void emmc_hal_write_end(void)
     CyU3PGpifDisable(CyFalse);
 }
 
-static CyU3PDmaBuffer_t _buffer __attribute__ ((aligned (4096)));
+static CyU3PDmaBuffer_t _buffer __attribute__ ((aligned (32)));
 
 void emmc_hal_write_commit(uint8_t* buf, uint32_t size, uint32_t count)
 {
