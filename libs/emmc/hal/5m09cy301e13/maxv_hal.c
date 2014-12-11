@@ -23,7 +23,6 @@
 void emmc_delay_ms(unsigned int us);
 bool emmc_line_init(void);
 bool emmc_gpif_init(unsigned short speed);
-bool emmc_gpif_init2(unsigned short speed);
 bool emmc_line_dq_setdir(bool binput);
 void emmc_line_dq_set(bool val);
 bool emmc_line_dq_get(void);
@@ -159,13 +158,6 @@ bool emmc_hal_init(void)
     }
 
     if(emmc.ncards == 0) return false;
-
-    //if(!emmc_gpif_init2(512))
-    //{
-    //    error_msg("GPIF II reinitialization failed.\n", 0);
-    //    
-    //    return false;
-    //}
 
     return true;
 }
@@ -310,41 +302,6 @@ bool emmc_gpif_init(unsigned short speed)
     return true;
 }
 
-#warning "remove function emmc_gpif_init2"
-bool emmc_gpif_init2(unsigned short speed)
-{
-    CyU3PPibClock_t pibClock;
-    CyU3PReturnStatus_t stat;
-
-    if(speed > 512) speed = 512;
-
-    CyU3PGpifDisable(CyTrue);
-
-    CyU3PPibDeInit();
-
-    pibClock.clkDiv      = 1024/speed;
-    pibClock.clkSrc      = CY_U3P_SYS_CLK_BY_16;
-    pibClock.isHalfDiv   = CyFalse;
-    pibClock.isDllEnable = CyFalse;
-
-    stat = CyU3PPibInit (CyTrue, &pibClock);
-
-    if (stat != CY_U3P_SUCCESS)
-    {
-        return false;
-    }
-
-    stat = CyU3PGpifLoad ((CyU3PGpifConfig_t *)&CyFxGpifConfig);
-
-    if (stat != CY_U3P_SUCCESS)
-    {
-        error_msg_set("");
-        return false;
-    }
-
-    return true;
-}
-
 bool emmc_line_dq_setdir(bool binput)
 {
 	CyU3PGpioSimpleConfig_t gpioConfig;
@@ -423,10 +380,6 @@ void emmc_line_dq_putb(bool bit)
 	emmc_line_dq_set(bit);
 	emmc_line_clk_set(1);
 	emmc_line_clk_set(0);
-
-    // #ifdef EMMC_DEBUG
-	// debug_printf(EMMC_DEBUG_LVL, "%d", bit);
-    // #endif
 }
 
 bool emmc_line_dq_getb(void)
@@ -436,10 +389,6 @@ bool emmc_line_dq_getb(void)
 	emmc_line_clk_set(0);
 	emmc_line_clk_set(1);
 	bit = emmc_line_dq_get();
-
-    // #ifdef EMMC_DEBUG
-	// debug_printf(EMMC_DEBUG_LVL, "[%d]\n", bit);
-    // #endif
 
 	return bit;
 }
@@ -843,7 +792,7 @@ void emmc_hal_write_commit(uint8_t* buf, uint32_t size, uint32_t count)
     }
 }
 
-void emmc_hal_trans_wait_complete(uint32_t wait)
+bool emmc_hal_trans_wait_complete(uint32_t wait)
 {
     CyU3PReturnStatus_t stat;
 
@@ -855,6 +804,8 @@ void emmc_hal_trans_wait_complete(uint32_t wait)
         #ifdef EMMC_DEBUG
         debug_printf(0, "wait timeout\n");
         #endif
+
+        return false;
     }
     else
     {
@@ -862,10 +813,13 @@ void emmc_hal_trans_wait_complete(uint32_t wait)
         debug_printf(0, "wait OK\n");
         #endif
     }
+
+    return true;
 }
 
 bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
 {
+    bool res;
     unsigned int timeout;
     unsigned char cmd = 17;
 
@@ -897,15 +851,17 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
         #endif
     }
 
-    emmc_hal_trans_wait_complete(1000);
+    res = emmc_hal_trans_wait_complete(1000);
     
     emmc_hal_read_end();
+
+    if(!res) return false;
 
     return true;
 }
 
 static unsigned char crc[16];
-static unsigned char _buf[1024] __attribute__ ((aligned (4096)));
+static unsigned char _buf[1024] __attribute__ ((aligned (32)));
 
 #define _bit(d, n) ((d>>n)&1)
 #define _setbit(d, n, value) (d = d&(~(1UL<<n)) | (value&1 ? 1UL<<n : 0))
@@ -944,7 +900,7 @@ bool emmc_tran_busy(void)
 {
     CyBool_t val;
 
-    CyU3PGetValue(0, &val);
+    CyU3PGpioGetValue(0, &val);
 
     return val == CyFalse;
 }
@@ -952,6 +908,7 @@ bool emmc_tran_busy(void)
 bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 {
     int i;
+    bool res;
     unsigned int timeout;
     unsigned char cmd = 24;
 
@@ -1003,31 +960,15 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 
     emmc_hal_write_commit(_buf, 1024, 1+512+16+1);
 
-    emmc_hal_trans_wait_complete(300);
+    res = emmc_hal_trans_wait_complete(300);
 
     emmc_hal_write_end();
+
+    if(!res) return false;
 
     #ifdef EMMC_DEBUG
     debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write OK\n", emmc.curcard);
     #endif
-
-    emmc_delay_ms(1);
-
-    if(emmc_tran_busy())
-    {
-        for(i = 2000; i > 0; i++) {
-            if(!emmc_tran_busy()) break;
-            emmc_delay_ms(1);
-        }
-
-        if(i == 0) {
-            #ifdef EMMC_DEBUG
-            debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write timeout.\n", emmc.curcard);
-            #endif
-            
-            return false;
-        }
-    }
 
     return true;
 }

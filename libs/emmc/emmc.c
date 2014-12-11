@@ -35,6 +35,11 @@ const char* emmc_state_name(unsigned char state)
     return state_name[state];
 }
 
+unsigned char emmc_card_state(unsigned short rca)
+{
+    return emmc.status.fields.current_state;
+}
+
 bool emmc_init(void)
 {
     int i;
