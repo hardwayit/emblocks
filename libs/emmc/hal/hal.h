@@ -13,6 +13,7 @@ extern struct EMMC
     unsigned short curcard;
     unsigned int blocklen;
     unsigned int blockcount;
+    unsigned char lastcmd;
 
 	union
     {

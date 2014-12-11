@@ -31,6 +31,7 @@ bool emmc_init(void);
 
 const char* emmc_state_name(unsigned char state);
 unsigned char emmc_card_state(unsigned short rca);
+unsigned char emmc_lastcmd(unsigned short rca);
 
 bool emmc_card_status(unsigned short rca);
 bool emmc_card_select(unsigned short rca);

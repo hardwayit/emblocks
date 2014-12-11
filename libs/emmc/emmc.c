@@ -40,6 +40,11 @@ unsigned char emmc_card_state(unsigned short rca)
     return emmc.status.fields.current_state;
 }
 
+unsigned char emmc_lastcmd(unsigned short rca)
+{
+    return emmc.lastcmd;
+}
+
 bool emmc_init(void)
 {
     int i;

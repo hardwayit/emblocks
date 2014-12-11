@@ -427,6 +427,8 @@ bool emmc_send_cmd(unsigned char cmd, unsigned int arg, char dat_dir, unsigned i
 
     if(*timeout == 0) return false;
 
+    emmc.lastcmd = cmd;
+
     return true;
 }
 
