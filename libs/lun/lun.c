@@ -1,6 +1,7 @@
 #include <lun/lun.h>
 
-#include <nvm.h>
+#include <emmc/emmc.h>
+#include <error/error.h>
 
 #define LUN_MAX 8
 #define BLOCK_SIZE 512
@@ -20,15 +21,15 @@ static struct
 } module;
 
 
-static bool lun_check_map(const LUNMap* map)
+static bool lun_check_map(void)
 {
     int i, j, l, m;
 
-    for(i = 0; i < MAX_LUN-1; i++)
+    for(i = 0; i < LUN_MAX-1; i++)
     {
         if(lunmap[i].blocks == 0) break;
 
-        for(j = i+1; j < MAX_LUN; j++)
+        for(j = i+1; j < LUN_MAX; j++)
         {
             if(lunmap[j].base == lunmap[i].base) return false;
 
@@ -55,7 +56,7 @@ bool lun_init(void)
 
 unsigned char lun_max_count(void)
 {
-    return MAX_LUN;
+    return LUN_MAX;
 }
 
 unsigned char lun_count(void)
@@ -85,7 +86,12 @@ unsigned char lun_state(unsigned char lun)
     return emmc_card_state(1);
 }
 
-LUNMap* lun_map(void)
+unsigned int lun_blocks(unsigned char lun)
+{
+    return lunmap[lun].blocks;
+}
+
+struct LUNMap* lun_map(void)
 {
     return lunmap;
 }
@@ -94,12 +100,12 @@ bool lun_map_flush(void)
 {
     int i;
 
-    if(!lun_check_map(map))
+    if(!lun_check_map())
     {
         return false;
     }
 
-    for(i = 0; i < MAX_LUN; i++)
+    for(i = 0; i < LUN_MAX; i++)
     {
         if(lunmap[i].blocks == 0) break;
     }
@@ -141,11 +147,11 @@ bool lun_map_flush(void)
 
 bool lun_read_single(unsigned char lun, unsigned int iblock, void* buf)
 {
-    return emmc_read_single(LUN_OFFSET+lunmap[lun].base+iblock*BLOCK_SIZE, buf);
+    return emmc_read_single_block(LUN_OFFSET+lunmap[lun].base+iblock*BLOCK_SIZE, buf);
 }
 
-bool lun_write_single(unsigned char lun, unsigned int iblock, const void* buf);
+bool lun_write_single(unsigned char lun, unsigned int iblock, const void* buf)
 {
-    return emmc_write_single(LUN_OFFSET+lunmap[lun].base+iblock*BLOCK_SIZE, buf);
+    return emmc_write_single_block(LUN_OFFSET+lunmap[lun].base+iblock*BLOCK_SIZE, buf);
 }
 

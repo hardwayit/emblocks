@@ -22,7 +22,9 @@ unsigned char lun_count(void);
 bool lun_ready(unsigned char lun);
 unsigned char lun_state(unsigned char lun);
 
-LUNMap* lun_map(void);
+unsigned int lun_blocks(unsigned char lun);
+
+struct LUNMap* lun_map(void);
 bool lun_map_flush(void);
 
 bool lun_push_table(void);

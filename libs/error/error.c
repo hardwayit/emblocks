@@ -4,6 +4,7 @@
 
 // Dependencies:
 #include <debug/debug.h>
+#include <sys/sys.h>
 
 #include <stdarg.h>
 
@@ -22,7 +23,13 @@ void error_throw(bool critical, const char* filename, unsigned int line, const c
 
     va_end(args);
 
-    if(critical) while(1);
+    if(critical) //while(1);
+    {
+        led_set(1, 0);
+        sys_delay_ms(1000);
+        led_set(1, 1);
+        sys_delay_ms(200);
+    }
 }
 
 void error_msg_set(const char* msg)
