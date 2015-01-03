@@ -1,9 +1,9 @@
-#ifndef EMMC_SOFT_HAL_H
-#define EMMC_SOFT_HAL_H
+#ifndef EMMC_MAXV_HAL_H
+#define EMMC_MAXV_HAL_H
 
 
 /*
- * Software eMMC Software HAL interface:
+ * eMMC HAL interface:
  */
 
 bool emmc_send_cmd(unsigned char cmd, unsigned int arg, char dat_dir, unsigned int* timeout);

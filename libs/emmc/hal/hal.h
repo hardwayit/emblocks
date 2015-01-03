@@ -1,5 +1,5 @@
-#ifndef EMMC_HAL_H
-#define EMMC_HAL_H
+#ifndef EMBLOCKS_EMMC_HAL_H
+#define EMBLOCKS_EMMC_HAL_H
 
 
 #define EMMC_T_NID 5

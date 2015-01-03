@@ -1,5 +1,3 @@
-#define __MODULE__ "error"
-
 #include <error/error.h>
 
 // Dependencies:
@@ -10,6 +8,9 @@
 
 
 #define ERROR_PRIORITY 1
+
+
+int error_code;
 
 
 void error_throw(bool critical, const char* filename, unsigned int line, const char* funcname, const char* msg, ...)

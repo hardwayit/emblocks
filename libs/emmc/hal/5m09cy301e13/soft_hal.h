@@ -48,7 +48,7 @@ struct EMMCRespR1Frame
 
 
 /*
- * Software eMMC Software HAL interface:
+ * eMMC Software HAL interface:
  */
 
 void emmc_delay_us(unsigned int us);
