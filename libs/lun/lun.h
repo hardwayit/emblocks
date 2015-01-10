@@ -14,7 +14,7 @@ struct LUNDesc
 };
 
 
-bool lun_init(void);
+bool lun_init(unsigned char data_nvmblk, unsigned char table_nvmblk, unsigned int table_offset);
 
 unsigned char lun_max_count(void);
 unsigned char lun_count(void);

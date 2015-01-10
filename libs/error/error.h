@@ -3,6 +3,7 @@
 
 
 #define EINVALARG 1
+#define EHWIO     2
 
 
 #define error_msg(msg, ...) error_throw(false, __FILE__, __LINE__, __func__, msg, __VA_ARGS__)
