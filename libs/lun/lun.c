@@ -161,13 +161,13 @@ bool lun_pop_nvm(void)
     return true;
 }
 
-bool lun_write(unsigned char lun, unsigned int iblock, const void* buf, unsigned int count)
+bool lun_write(unsigned char lun, unsigned int sectors, const void* buf, unsigned int count)
 {
-    return nvm_write(module.data_nvmblk, lunmap[lun].base+iblock*BLOCK_SIZE, buf, count);
+    return nvm_write(module.data_nvmblk, lunmap[lun].base+sectors*BLOCK_SIZE, buf, count);
 }
 
-bool lun_read(unsigned char lun, unsigned int iblock, void* buf, unsigned int count)
+bool lun_read(unsigned char lun, unsigned int sectors, void* buf, unsigned int count)
 {
-    return nvm_read(module.data_nvmblk, lunmap[lun].base+iblock*BLOCK_SIZE, buf, count);
+    return nvm_read(module.data_nvmblk, lunmap[lun].base+sectors*BLOCK_SIZE, buf, count);
 }
 

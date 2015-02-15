@@ -1,6 +1,9 @@
 #include <nvm/nvm.h>
 #include <nvm/hal/hal.h>
+#include <error/error.h>
 
+#include <emmc/emmc.h>
+#include <nor/nor.h>
 
 #define NVM_COUNT 6
 
@@ -21,7 +24,7 @@
  *   160K:~   - app usage
  */
 
-NVMBank a_nvm_banks[NVM_COUNT] = {
+struct NVMBank a_nvm_banks[NVM_COUNT] = {
     { // eMMC, 1 MB, for kernel usage
 #ifdef SECSIZE
     #undef SECSIZE
@@ -79,7 +82,7 @@ NVMBank a_nvm_banks[NVM_COUNT] = {
 #undef SECSIZE
 };
 
-const NVMBank* nvm_banks = a_nvm_banks;
+const struct NVMBank* nvm_banks = a_nvm_banks;
 
 typedef bool (*nvm_write_func) (unsigned int sector, const void* data, unsigned int count);
 typedef bool (*nvm_read_func) (unsigned int sector, void* data, unsigned int count);
@@ -87,7 +90,7 @@ typedef bool (*nvm_read_func) (unsigned int sector, void* data, unsigned int cou
 static const struct NVMDrv
 {
     nvm_write_func write;
-    nvm_read_func write;
+    nvm_read_func read;
 } nvm_drvs[] = {
     {
         .write = &emmc_write,

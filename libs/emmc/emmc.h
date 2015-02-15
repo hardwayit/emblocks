@@ -41,6 +41,9 @@ bool emmc_blockcount_set(unsigned int count);
 bool emmc_read_single_block(unsigned int iblock, unsigned char* buf);
 bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf);
 
+bool emmc_write(unsigned int iblock, const void* buf, unsigned int blocks);
+bool emmc_read(unsigned int iblock, void* buf, unsigned int blocks);
+
 
 #endif /* EMB_EMMC_H */
 

@@ -9,6 +9,9 @@
 #endif
 
 
+#define EMMC_BLOCK_SIZE 512
+
+
 struct EMMC emmc;
 
 
@@ -74,7 +77,7 @@ bool emmc_init(void)
         return false;
     }
 
-    if(!emmc_blocklen_set(512)) {
+    if(!emmc_blocklen_set(EMMC_BLOCK_SIZE)) {
         error_msg("Error invoking set block length command.\n", 0);
         return false;
     }
@@ -86,4 +89,35 @@ bool emmc_init(void)
 
     return true;
 }
+
+
+bool emmc_write(unsigned int iblock, const void* buf, unsigned int blocks)
+{
+    unsigned int i;
+    const unsigned char* cbuf = (const unsigned char*) buf;
+
+    for (i = 0; i < blocks; i++) {
+        if (!emmc_write_single_block(iblock+i, &cbuf[i*EMMC_BLOCK_SIZE])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool emmc_read(unsigned int iblock, void* buf, unsigned int blocks)
+{
+    unsigned int i;
+    unsigned char* cbuf = (unsigned char*) buf;
+
+    for (i = 0; i < blocks; i++) {
+        if (!emmc_read_single_block(iblock+i, &cbuf[i*EMMC_BLOCK_SIZE])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
