@@ -29,7 +29,7 @@ static bool lun_check_map(void)
 
     for(i = 0; i < LUN_MAX-1; i++)
     {
-        if(lunmap[i].blocks == 0) break;
+        if(lunmap[i].sectors == 0) break;
 
         for(j = i+1; j < LUN_MAX; j++)
         {
@@ -37,7 +37,7 @@ static bool lun_check_map(void)
 
             lunmap[j].base > lunmap[i].base ? (l = j, m = i) : (l = i, m = j);
 
-            if(lunmap[l].base < lunmap[m].base+lunmap[m].blocks) return false;
+            if(lunmap[l].base < lunmap[m].base+lunmap[m].sectors) return false;
         }
     }
 
@@ -98,9 +98,9 @@ unsigned char lun_state(unsigned char lun)
     return emmc_card_state(1);
 }
 
-unsigned int lun_blocks(unsigned char lun)
+unsigned int lun_sectors(unsigned char lun)
 {
-    return lunmap[lun].blocks;
+    return lunmap[lun].sectors;
 }
 
 struct LUNMap* lun_map(void)
@@ -119,7 +119,7 @@ bool lun_map_flush(void)
 
     for(i = 0; i < LUN_MAX; i++)
     {
-        if(lunmap[i].blocks == 0) break;
+        if(lunmap[i].sectors == 0) break;
     }
 
     module.count = i;
@@ -129,13 +129,13 @@ bool lun_map_flush(void)
 
 bool lun_push_nvm(void)
 {
-    if(!nvm_write(module.table_nvmblk, 0, lunmap, sizeof(lunmap)))
+    if(!nvm_write(module.table_nvmblk, module.table_offset, lunmap, sizeof(lunmap)))
     {
         error_code = EHWIO;
         return false;
     }
 
-    if(!nvm_write(module.table_nvmblk, sizeof(lunmap), luns, sizeof(luns)))
+    if(!nvm_write(module.table_nvmblk, module.table_offset+sizeof(lunmap), luns, sizeof(luns)))
     {
         error_code = EHWIO;
         return false;
@@ -146,13 +146,13 @@ bool lun_push_nvm(void)
 
 bool lun_pop_nvm(void)
 {
-    if(!nvm_read(module.table_nvmblk, 0, lunmap, sizeof(lunmap)))
+    if(!nvm_read(module.table_nvmblk, module.table_offset, lunmap, sizeof(lunmap)))
     {
         error_code = EHWIO;
         return false;
     }
 
-    if(!nvm_read(module.table_nvmblk, sizeof(lunmap), luns, sizeof(luns)))
+    if(!nvm_read(module.table_nvmblk, module.table_offset+sizeof(lunmap), luns, sizeof(luns)))
     {
         error_code = EHWIO;
         return false;

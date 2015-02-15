@@ -5,7 +5,7 @@
 struct LUNMap
 {
     unsigned int base;
-    unsigned int blocks;
+    unsigned int sectors;
 };
 
 struct LUNDesc
@@ -22,7 +22,7 @@ unsigned char lun_count(void);
 bool lun_ready(unsigned char lun);
 unsigned char lun_state(unsigned char lun);
 
-unsigned int lun_blocks(unsigned char lun);
+unsigned int lun_sectors(unsigned char lun);
 
 struct LUNMap* lun_map(void);
 bool lun_map_flush(void);
