@@ -57,7 +57,7 @@ bool emmc_hal_init(void)
 {
     unsigned int timeout;
 
-    if(!emmc_gpif_init(32))
+    if(!emmc_gpif_init(512))
     {
         error_msg_set("GPIF II initialization failed.\n");
         
@@ -502,6 +502,8 @@ bool emmc_card_status(unsigned short rca)
 {
     unsigned int timeout;
 
+    if(rca == 0) rca = emmc.curcard;
+
     if(emmc_send_cmd(13, ((unsigned int)(rca))<<16, 0, (timeout=100,&timeout)))
     {
         emmc_receive_status();
@@ -785,8 +787,8 @@ void emmc_hal_write_commit(uint8_t* buf, uint32_t size, uint32_t count)
     _buffer.size = size;
     _buffer.status = 0;
 
-    stat = CyU3PDmaChannelSetupSendBuffer(&eMMCDMAChHandle, &_buffer);// TODO: restrictions!!!
     led_set(1, 1);
+    stat = CyU3PDmaChannelSetupSendBuffer(&eMMCDMAChHandle, &_buffer);// TODO: restrictions!!!
 
     if(stat != CY_U3P_SUCCESS)
     {
@@ -827,11 +829,13 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
 
     if(!emmc_hal_read_start(0))
     {
+        error_msg("!emmc_hal_read_start\n", 0);
         return false;
     }
 
     if(!emmc_hal_read_commit(buf, 1024, 1+512+16+1))
     {
+        error_msg("!emmc_hal_read_commit\n", 0);
         return false;
     }
 
@@ -840,6 +844,7 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
         #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error\n", emmc.curcard, cmd);
         #endif
+        error_msg("!emmc_send_cmd\n", 0);
 
         return false;
     }
@@ -857,7 +862,10 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
     
     emmc_hal_read_end();
 
-    if(!res) return false;
+    if(!res) {
+        error_msg("!emmc_hal_trans_wait_complete\n", 0);
+        return false;
+    }
 
     return true;
 }
@@ -962,7 +970,7 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 
     emmc_hal_write_commit(_buf, 1024, 1+512+16+1);
 
-    res = emmc_hal_trans_wait_complete(300);
+    res = emmc_hal_trans_wait_complete(1000);
 
     emmc_hal_write_end();
 

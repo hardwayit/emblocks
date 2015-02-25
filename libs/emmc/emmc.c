@@ -68,7 +68,7 @@ bool emmc_init(void)
         if(!emmc_card_status(i)) continue;
 
         #ifdef EMMC_DEBUG
-        debug_printf(EMMC_DEBUG_LVL, "Card %d current state: %s\n", i, emmc_state_name[emmc.status.fields.current_state]);
+        debug_printf(EMMC_DEBUG_LVL, "Card %d current state: %s\n", i, emmc_state_name(emmc.status.fields.current_state));
         #endif
     }
 

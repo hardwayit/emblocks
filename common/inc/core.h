@@ -1,3 +1,7 @@
+#define EMB_VER_MAJOR    1
+#define EMB_VER_MINOR    0
+#define EMB_VER_REVISION 0
+
 #define true (1)
 #define false (0)
 

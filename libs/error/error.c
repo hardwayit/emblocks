@@ -24,11 +24,11 @@ void error_throw(bool critical, const char* filename, unsigned int line, const c
 
     va_end(args);
 
-    if(critical) //while(1);
+    if(critical) while(1)
     {
-        led_set(1, 0);
-        sys_delay_ms(1000);
         led_set(1, 1);
+        sys_delay_ms(1000);
+        led_set(1, 0);
         sys_delay_ms(200);
     }
 }

@@ -131,7 +131,7 @@ bool nvm_write(unsigned char bank, unsigned int sector, const void* data, unsign
         return false;
     }
 
-    if(sector+count > a_nvm_banks[bank].sectors)
+    if(a_nvm_banks[bank].sectors && sector+count > a_nvm_banks[bank].sectors)
     {
         error_code = EINVALARG;
         return false;
@@ -148,7 +148,7 @@ bool nvm_read(unsigned char bank, unsigned int sector, void* data, unsigned int 
         return false;
     }
 
-    if(sector+count > a_nvm_banks[bank].sectors)
+    if(a_nvm_banks[bank].sectors && sector+count > a_nvm_banks[bank].sectors)
     {
         error_code = EINVALARG;
         return false;

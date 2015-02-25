@@ -33,6 +33,8 @@ static bool lun_check_map(void)
 
         for(j = i+1; j < LUN_MAX; j++)
         {
+            if(lunmap[j].sectors == 0) break;
+
             if(lunmap[j].base == lunmap[i].base) return false;
 
             lunmap[j].base > lunmap[i].base ? (l = j, m = i) : (l = i, m = j);
@@ -78,9 +80,10 @@ unsigned char lun_count(void)
 
 bool lun_ready(unsigned char lun)
 {
-    if(emmc_lastcmd(1) == 24)
+    //if(emmc_lastcmd(0) == 24)
     {
-        if(!emmc_card_status(1))
+        //emmc_delay_ms(1000);
+        if(!emmc_card_status(0))
         {
             error_msg("Error get card status.\n", 0);
 
@@ -88,14 +91,14 @@ bool lun_ready(unsigned char lun)
         }
     }
 
-    if(emmc_card_state(1) == EMMC_ST_TRAN) return true;
+    if(emmc_card_state(0) == EMMC_ST_TRAN) return true;
 
     return false;
 }
 
 unsigned char lun_state(unsigned char lun)
 {
-    return emmc_card_state(1);
+    return emmc_card_state(0);
 }
 
 unsigned int lun_sectors(unsigned char lun)
