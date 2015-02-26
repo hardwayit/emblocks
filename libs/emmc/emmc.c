@@ -56,14 +56,17 @@ bool emmc_init(void)
     emmc.blocklen = 0;
     emmc.blockcount = 0;
 
-    if(!emmc_hal_init()) return false;
+    if (!emmc_hal_init()) {
+        error_msg("eMMC HAL initialization failed!\n", 0);
+        return false;
+    }
 
-    if(!emmc_card_select(1)) {
+    if (!emmc_card_select(1)) {
         error_msg("Error selecting card.\n", 0);
         return false;
     }
 
-    for(i = 1; i <= emmc.ncards; i++)
+    for (i = 1; i <= emmc.ncards; i++)
     {
         if(!emmc_card_status(i)) continue;
 
@@ -72,18 +75,28 @@ bool emmc_init(void)
         #endif
     }
 
-    if(!emmc_switch(0xB7, 0x02, 0x00)) {
+    if (!emmc_switch(0xB7, 0x02, 0x00)) {
         error_msg("Error invoking switch command.\n", 0);
         return false;
     }
 
-    if(!emmc_blocklen_set(EMMC_BLOCK_SIZE)) {
+    if (!emmc_blocklen_set(EMMC_BLOCK_SIZE)) {
         error_msg("Error invoking set block length command.\n", 0);
         return false;
     }
 
-    if(!emmc_blockcount_set(1)) {
+    if (!emmc_blockcount_set(1)) {
         error_msg("Error invoking set block count command.\n", 0);
+        return false;
+    }
+
+    return true;
+}
+
+bool emmc_deinit(void)
+{
+    if (!emmc_hal_deinit()) {
+        error_msg("Error stopping eMMC HAL.\n", 0);
         return false;
     }
 

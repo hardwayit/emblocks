@@ -28,6 +28,7 @@
 
 
 bool emmc_init(void);
+bool emmc_deinit(void);
 
 const char* emmc_state_name(unsigned char state);
 unsigned char emmc_card_state(unsigned short rca);

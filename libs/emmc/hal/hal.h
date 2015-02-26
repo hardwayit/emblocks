@@ -53,6 +53,7 @@ extern struct EMMC
 
 
 bool emmc_hal_init(void);
+bool emmc_hal_deinit(void);
 
 #endif
 

@@ -23,6 +23,7 @@
 void emmc_delay_ms(unsigned int us);
 bool emmc_line_init(void);
 bool emmc_gpif_init(unsigned short speed);
+bool emmc_gpif_deinit(void);
 bool emmc_line_dq_setdir(bool binput);
 void emmc_line_dq_set(bool val);
 bool emmc_line_dq_get(void);
@@ -158,6 +159,27 @@ bool emmc_hal_init(void)
     }
 
     if(emmc.ncards == 0) return false;
+
+    return true;
+}
+
+bool emmc_hal_deinit(void)
+{
+    unsigned int timeout;
+
+	if(!emmc_send_cmd(0, 0x00000000, 0, (timeout=100,&timeout)))// reset to IDLE
+    {
+        error_msg_set("CMD0 sending error.\n");
+
+        return false;
+    }
+
+    if(!emmc_gpif_deinit())
+    {
+        error_msg_set("GPIF II deinitialization failed.\n");
+        
+        return false;
+    }
 
     return true;
 }
@@ -298,6 +320,14 @@ bool emmc_gpif_init(unsigned short speed)
         error_msg_set("");
         return false;
     }
+
+    return true;
+}
+
+bool emmc_gpif_deinit(void)
+{
+    CyU3PGpifDisable(CyTrue);
+    CyU3PPibDeInit();
 
     return true;
 }
@@ -763,6 +793,8 @@ bool emmc_hal_write_start(EMMCCallback_t cb)
         debug_printf(EMMC_DEBUG_LVL, "eMMC HAL write_start Gpif start failed\n");
         #endif
 
+        emmc_hal_write_end();
+
         return false;
     }
 
@@ -809,6 +841,10 @@ bool emmc_hal_trans_wait_complete(uint32_t wait)
         debug_printf(0, "wait timeout\n");
         #endif
 
+        if (stat != CY_U3P_ERROR_TIMEOUT) {
+            error_critical("Undefined error on WaitForCompletion", 0);
+        }
+
         return false;
     }
     else
@@ -830,13 +866,17 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
     if(!emmc_hal_read_start(0))
     {
         error_msg("!emmc_hal_read_start\n", 0);
-        return false;
+
+        res = false;
+        goto emmc_read_single_block_cleanup;
     }
 
     if(!emmc_hal_read_commit(buf, 1024, 1+512+16+1))
     {
         error_msg("!emmc_hal_read_commit\n", 0);
-        return false;
+
+        res = false;
+        goto emmc_read_single_block_cleanup;
     }
 
     if(!emmc_send_cmd(cmd, iblock, 0, (timeout=100,&timeout)))
@@ -846,7 +886,8 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
         #endif
         error_msg("!emmc_send_cmd\n", 0);
 
-        return false;
+        res = false;
+        goto emmc_read_single_block_cleanup;
     }
     else
     {
@@ -860,14 +901,14 @@ bool emmc_read_single_block(unsigned int iblock, unsigned char* buf)
 
     res = emmc_hal_trans_wait_complete(1000);
     
-    emmc_hal_read_end();
-
     if(!res) {
         error_msg("!emmc_hal_trans_wait_complete\n", 0);
-        return false;
     }
 
-    return true;
+emmc_read_single_block_cleanup:
+    emmc_hal_read_end();
+
+    return res;
 }
 
 static unsigned char crc[16];
@@ -922,13 +963,13 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
     unsigned int timeout;
     unsigned char cmd = 24;
 
-    if(!emmc_hal_write_start(NULL))
-    {
+    if (!emmc_hal_write_start(NULL)) {
+        error_msg("!emmc_hal_write_start\n", 0);
         return false;
     }
 
     _buf[0] = 0x00;// start byte
-    for(i = 0; i < 512; i++) _buf[1+i] = buf[i];
+    for (i = 0; i < 512; i++) _buf[1+i] = buf[i];
 
     crc16_8x(_buf+1, 512, crc);
 
@@ -950,16 +991,16 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
     _buf[1 + 512 + 15] = crc[ 0];
     _buf[1 + 512 + 16] = 0xFF;// stop byte
 
-    if(!emmc_send_cmd(cmd, iblock, 0, (timeout=10,&timeout)))// Write single block
+    if (!emmc_send_cmd(cmd, iblock, 0, (timeout=10,&timeout)))// Write single block
     {
         #ifdef EMMC_DEBUG
         debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: cmd %d error\n", emmc.curcard, cmd);
         #endif
+        error_msg("eMMC[%d]: cmd %d error\n", emmc.curcard, cmd);
 
-        return false;
-    }
-    else
-    {
+        res = false;
+        goto emmc_write_single_block_cleanup;
+    } else {
         emmc_receive_status();
 
         #ifdef EMMC_DEBUG
@@ -972,14 +1013,18 @@ bool emmc_write_single_block(unsigned int iblock, const unsigned char* buf)
 
     res = emmc_hal_trans_wait_complete(1000);
 
-    emmc_hal_write_end();
-
-    if(!res) return false;
+    if (!res) {
+        error_msg("!write:emmc_hal_trans_wait_complete\n", 0);
+        goto emmc_write_single_block_cleanup;
+    }
 
     #ifdef EMMC_DEBUG
     debug_printf(EMMC_DEBUG_LVL, "eMMC[%d]: write OK\n", emmc.curcard);
     #endif
 
-    return true;
+emmc_write_single_block_cleanup:
+    emmc_hal_write_end();
+
+    return res;
 }
 

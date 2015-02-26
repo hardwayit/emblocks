@@ -78,22 +78,35 @@ unsigned char lun_count(void)
     return module.count;
 }
 
+extern bool emmc_hal_is_busy(void);
+
 bool lun_ready(unsigned char lun)
 {
-    //if(emmc_lastcmd(0) == 24)
-    {
+    if (emmc_card_state(0) == EMMC_ST_PRG || emmc_lastcmd(0) == 24) {
         //emmc_delay_ms(1000);
-        if(!emmc_card_status(0))
-        {
+        if (!emmc_card_status(0)) {
             error_msg("Error get card status.\n", 0);
 
             return false;
         }
     }
 
-    if(emmc_card_state(0) == EMMC_ST_TRAN) return true;
+    if (emmc_card_state(0) == EMMC_ST_TRAN) return true;
 
     return false;
+}
+
+bool lun_reset(unsigned char lun)
+{
+    if (!emmc_deinit()) {
+        return false;
+    }
+
+    if (!emmc_init()) {
+        return false;
+    }
+
+    return true;
 }
 
 unsigned char lun_state(unsigned char lun)
@@ -166,11 +179,11 @@ bool lun_pop_nvm(void)
 
 bool lun_write(unsigned char lun, unsigned int sectors, const void* buf, unsigned int count)
 {
-    return nvm_write(module.data_nvmblk, lunmap[lun].base+sectors*BLOCK_SIZE, buf, count);
+    return nvm_write(module.data_nvmblk, lunmap[lun].base+sectors, buf, count);
 }
 
 bool lun_read(unsigned char lun, unsigned int sectors, void* buf, unsigned int count)
 {
-    return nvm_read(module.data_nvmblk, lunmap[lun].base+sectors*BLOCK_SIZE, buf, count);
+    return nvm_read(module.data_nvmblk, lunmap[lun].base+sectors, buf, count);
 }
 
